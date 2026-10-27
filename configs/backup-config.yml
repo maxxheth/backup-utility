@@ -1,0 +1,104 @@
+# EDFX Local Backup Configuration
+# Backs up /var/www/*, /var/www/edfx-labs/* (per-subproject), and /home/maxx to the Hetzner EDFX S3 bucket.
+version: "1"
+
+defaults:
+  # Generate .git-backup-ref.txt in each repo directory and GIT_REPOS_MANIFEST.txt at archive root
+  # whenever .git directories are excluded.
+  generate_git_refs: true
+
+  # Global exclusions applied to all targets
+  excludes:
+    # Git history (replaced by .git-backup-ref.txt and GIT_REPOS_MANIFEST.txt)
+    - .git
+
+    # Heavy dependencies & build artifacts
+    - node_modules
+    - vendor
+    - .venv
+    - venv
+    - __pycache__
+    - .pytest_cache
+    - .mypy_cache
+    - .next
+    - .nuxt
+    - .svelte-kit
+    - .turbo
+    - .parcel-cache
+    - .gradle
+
+    # Package manager & language caches
+    - .cache
+    - .npm
+    - .pnpm-store
+    - .yarn
+    - .bun
+    - .cargo/registry
+    - .cargo/git
+    - .rustup
+
+    # Existing archives & editor swap files
+    - "*.tgz"
+    - "*.tar.gz"
+    - "*.tar.zst"
+    - "*.zip"
+    - "*.swp"
+    - "*.swo"
+    - "*.swn"
+    - "*.swm"
+    - "*~"
+
+targets:
+  # 1. /var/www — Per-subdirectory archives (s3://edfx/var-www/<project>/<project>-YYYYMMDD-HHMMSS.tgz)
+  - name: var-www
+    label: var-www
+    mode: subdirectories
+    type: filesystem
+    bucket_path: var-www
+    paths:
+      working_dir: /var/www
+    skip_dirs:
+      - edfx-labs   # Handled separately as per-subproject archives by the edfx-labs target below
+    overrides: {}
+
+  # 2. /var/www/edfx-labs — Per-subproject archives (s3://edfx/var-www/edfx-labs/<subproject>/<subproject>-YYYYMMDD-HHMMSS.tgz)
+  - name: edfx-labs
+    label: edfx-labs
+    mode: subdirectories
+    type: filesystem
+    bucket_path: var-www/edfx-labs
+    paths:
+      working_dir: /var/www/edfx-labs
+    skip_dirs: []
+    overrides: {}
+
+  # 3. /home/maxx — Single archive with additional desktop/browser/model exclusions
+  - name: home-maxx
+    label: home-maxx
+    mode: single
+    type: filesystem
+    bucket_path: home-maxx
+    paths:
+      working_dir: /home/maxx
+    excludes:
+      # Trash & container runtime storage
+      - .Trash
+      - .local/share/Trash
+      - .local/share/containers
+      - .local/share/Docker
+      - .var
+
+      # Browser profiles & heavy desktop/IDE extension state
+      - .config/google-chrome
+      - .config/chromium
+      - .mozilla
+      - .vscode/extensions
+      - .vscode-insiders
+      - .vscode-server
+      - .cursor/extensions
+      - .zoom
+
+      # Large local LLM weights & VM images
+      - .ollama/models
+      - GGUFModels
+      - VirtualBox VMs

@@ -1,0 +1,51 @@
+# Compiled binaries & build artifacts
+dist/
+edfx-backup
+main
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go test & coverage artifacts
+*.test
+*.out
+coverage.out
+go.work
+go.work.sum
+vendor/
+
+# Environment & credentials (keep .env.example tracked)
+.env
+.env.*
+!.env.example
+
+# Logs & runtime state
+logs/
+*.log
+tmp/
+temp/
+
+# Downloaded/local backup archives & SQL dumps
+backups/
+tarballs/
+*.tgz
+*.tar.gz
+*.tar.zst
+*.zip
+*.sql
+*.dump
+
+# Editor & IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.swm
+*~
+
+# OS metadata
+.DS_Store
+Thumbs.db

@@ -1,0 +1,25 @@
+# EDFX S3 Smart Retention Policy
+# Used with: edfx-backup create --prune --retention-policy configs/retention-policy.yml
+version: "1"
+
+rulesets:
+  # Delete daily backups older than 14 days, except Sunday backups (preserves weekly)
+  daily-cleanup:
+    older_than: "14 days"
+    action: delete
+    exclude: "sunday"
+    target_storage: s3
+
+  # Delete weekly backups older than 6 months, except last-day-of-month backups (preserves monthly)
+  weekly-cleanup:
+    older_than: "6 months"
+    action: delete
+    exclude: "last day of month"
+    target_storage: s3
+
+  # Delete backups older than 1 year, except last-day-of-month backups
+  annual-purge:
+    older_than: "1 year"
+    action: delete
+    exclude: "last day of month"
+    target_storage: s3
